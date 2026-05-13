@@ -3,140 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>공부 도우미</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <title>숫자 맞추기 게임</title>
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            color: #333;
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb);
-            background-size: 400% 400%;
-            animation: gradientBG 8s ease infinite;
-            color: #333;
         }
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        h1 {
+            margin-top: 50px;
+            font-size: 2.5rem;
         }
-        header {
-            background: rgba(76, 63, 255, 0.9);
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        p {
+            font-size: 1.2rem;
         }
-        header h1 {
-            font-size: 2.8rem;
-            margin: 0;
-        }
-        header p {
-            font-size: 1.3rem;
-            margin: 10px 0 0;
-        }
-        nav {
-            background: rgba(76, 76, 157, 0.9);
-            color: white;
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        nav a {
-            color: white;
-            margin: 0 20px;
-            text-decoration: none;
-            font-weight: bold;
+        input, button {
             font-size: 1rem;
+            padding: 10px;
+            margin: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
-        nav a:hover {
-            text-decoration: underline;
-        }
-        section {
-            padding: 40px 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        section h2 {
-            font-size: 2rem;
-            color: #4c4c9d;
-            margin-bottom: 20px;
-        }
-        .card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin: 20px 0;
-            padding: 20px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-        .card h3 {
-            margin: 0 0 10px;
-            color: #6c63ff;
-        }
-        footer {
-            background: #333;
+        button {
+            background-color: #6c63ff;
             color: white;
-            text-align: center;
-            padding: 20px;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
         }
-        footer p {
-            margin: 0;
-            font-size: 0.9rem;
+        button:hover {
+            background-color: #4c4c9d;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>공부 도우미</h1>
-        <p>효율적인 학습을 위한 최고의 도구</p>
-    </header>
-    <nav>
-        <a href="#resources">학습 자료</a>
-        <a href="#schedule">일정 관리</a>
-        <a href="#motivation">동기 부여</a>
-    </nav>
-    <section id="resources">
-        <h2>학습 자료</h2>
-        <div class="card">
-            <h3>수학</h3>
-            <p>수학 공식과 문제 풀이 자료를 확인하세요.</p>
-        </div>
-        <div class="card">
-            <h3>과학</h3>
-            <p>과학 실험과 이론 자료를 확인하세요.</p>
-        </div>
-    </section>
-    <section id="schedule">
-        <h2>일정 관리</h2>
-        <div class="card">
-            <p>오늘의 할 일:</p>
-            <ul>
-                <li>수학 숙제 완료</li>
-                <li>과학 시험 준비</li>
-                <li>독서 30분</li>
-            </ul>
-        </div>
-    </section>
-    <section id="motivation">
-        <h2>동기 부여</h2>
-        <div class="card">
-            <p>"성공은 준비와 기회의 만남이다." - 오프라 윈프리</p>
-        </div>
-        <div class="card">
-            <p>"포기하지 마세요. 위대한 일은 시간이 걸립니다."</p>
-        </div>
-    </section>
-    <footer>
-        <p>&copy; 2026 공부 도우미. All rights reserved.</p>
-    </footer>
+    <h1>숫자 맞추기 게임</h1>
+    <p>1부터 10 사이의 숫자를 맞춰보세요!</p>
+    <input type="number" id="guess" placeholder="숫자를 입력하세요" min="1" max="10">
+    <button onclick="checkGuess()">확인</button>
+    <div class="result" id="result"></div>
+
+    <script>
+        // 1부터 10 사이의 랜덤 숫자 생성
+        const randomNumber = Math.floor(Math.random() * 10) + 1;
+
+        function checkGuess() {
+            const userGuess = document.getElementById('guess').value;
+            const result = document.getElementById('result');
+
+            if (!userGuess) {
+                result.textContent = "숫자를 입력하세요!";
+                result.style.color = "red";
+                return;
+            }
+
+            if (userGuess == randomNumber) {
+                result.textContent = "정답입니다! 🎉";
+                result.style.color = "green";
+            } else if (userGuess < randomNumber) {
+                result.textContent = "더 큰 숫자를 입력해보세요!";
+                result.style.color = "blue";
+            } else {
+                result.textContent = "더 작은 숫자를 입력해보세요!";
+                result.style.color = "blue";
+            }
+        }
+    </script>
 </body>
 </html>
