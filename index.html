@@ -4,39 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>공부 도우미</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Pacifico&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb);
-            background-size: 400% 400%;
-            animation: gradientBG 8s ease infinite;
+            background: url('https://source.unsplash.com/1600x900/?study,books') no-repeat center center fixed;
+            background-size: cover;
             color: #333;
         }
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
         header {
-            background: rgba(76, 63, 255, 0.9);
+            background: rgba(0, 0, 0, 0.6);
             color: white;
             padding: 40px 20px;
             text-align: center;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         header h1 {
-            font-size: 2.8rem;
+            font-family: 'Pacifico', cursive;
+            font-size: 3rem;
             margin: 0;
         }
         header p {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             margin: 10px 0 0;
         }
         nav {
-            background: rgba(76, 76, 157, 0.9);
+            background: rgba(0, 0, 0, 0.7);
             color: white;
             padding: 15px;
             text-align: center;
@@ -47,7 +42,7 @@
             margin: 0 20px;
             text-decoration: none;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 1.2rem;
         }
         nav a:hover {
             text-decoration: underline;
@@ -56,11 +51,15 @@
             padding: 40px 20px;
             max-width: 1200px;
             margin: 0 auto;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
         section h2 {
-            font-size: 2rem;
+            font-size: 2.5rem;
             color: #4c4c9d;
             margin-bottom: 20px;
+            text-align: center;
         }
         .card {
             background: white;
@@ -79,7 +78,7 @@
             color: #6c63ff;
         }
         footer {
-            background: #333;
+            background: rgba(0, 0, 0, 0.8);
             color: white;
             text-align: center;
             padding: 20px;
@@ -90,7 +89,7 @@
         }
         footer p {
             margin: 0;
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
     </style>
 </head>
