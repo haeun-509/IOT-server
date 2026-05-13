@@ -1,0 +1,122 @@
+function doGet(e) {
+  return handleRequest(e);
+}
+
+function doPost(e) {
+  return handleRequest(e);
+}
+
+function handleRequest(e) {
+  var sheetId = '1YFAWg8ePLdLWKE59oGhdjvw5VKmKBxnwEqB9G_TCj70';
+  var sheetName = '시트1';
+
+  try {
+    if (!e) {
+      return jsonResponse({ result: '오류 발생', error: '요청 정보가 없습니다.' });
+    }
+
+    var temp = null;
+    var hum = null;
+
+    if (e.parameter && e.parameter.temperature != null && e.parameter.humidity != null) {
+      temp = e.parameter.temperature;
+      hum = e.parameter.humidity;
+    } else if (e.postData && e.postData.contents) {
+      var data = JSON.parse(e.postData.contents);
+      temp = data.temperature;
+      hum = data.humidity;
+    }
+
+    if (temp == null || hum == null) {
+      return jsonResponse({
+        result: '센서값 없음',
+        error: 'temperature 또는 humidity 값이 없습니다.'
+      });
+    }
+
+    var sheet = SpreadsheetApp.openById(sheetId).getSheetByName(sheetName);
+    if (!sheet) {
+      return jsonResponse({
+        result: '오류 발생',
+        error: '시트를 찾을 수 없습니다: ' + sheetName
+      });
+    }
+
+    var timestamp = new Date();
+    var headers = ['Timestamp', 'temperature', 'humidity'];
+
+    if (sheet.getLastRow() === 0) {
+      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    }
+
+    sheet.appendRow([timestamp, Number(temp), Number(hum)]);
+    sheet.getRange(sheet.getLastRow(), 1).setNumberFormat('yyyy-MM-dd HH:mm:ss');
+
+    var prompt = '현재 온도 ' + temp + '도, 습도 ' + hum + '%입니다. 이 환경에 맞는 짧은 어린이 옷차림 조언을 20자 이내 한국어로 해줘.';
+    var apiKey = 'AIzaSyB84P1bMGHxTLYHC8NK5zGE4IiHEv5bsJYey';
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent';
+
+    var payload = {
+      contents: [
+        {
+          parts: [{ text: prompt }]
+        }
+      ]
+    };
+
+    var geminiResponse = UrlFetchApp.fetch(url, {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { 'x-goog-api-key': apiKey },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+
+    var geminiStatus = geminiResponse.getResponseCode();
+    var geminiText = geminiResponse.getContentText();
+
+    if (geminiStatus < 200 || geminiStatus >= 300) {
+      return jsonResponse({
+        result: '오류 발생',
+        error: 'Gemini 호출 실패',
+        status: geminiStatus,
+        body: geminiText
+      });
+    }
+
+    var geminiJson = JSON.parse(geminiText);
+    var result =
+      geminiJson &&
+      geminiJson.candidates &&
+      geminiJson.candidates[0] &&
+      geminiJson.candidates[0].content &&
+      geminiJson.candidates[0].content.parts &&
+      geminiJson.candidates[0].content.parts[0] &&
+      geminiJson.candidates[0].content.parts[0].text
+        ? String(geminiJson.candidates[0].content.parts[0].text).trim()
+        : '응답 없음';
+
+    return jsonResponse({ result: result });
+  } catch (err) {
+    return jsonResponse({
+      result: '오류 발생',
+      error: String(err)
+    });
+  }
+}
+
+function jsonResponse(data) {
+  return ContentService
+    .createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function authTest() {
+  var sheetId = '1YFAWg8ePLdLWKE59oGhdjvw5VKmKBxnwEqB9G_TCj70';
+  SpreadsheetApp.openById(sheetId);
+
+  UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models', {
+    method: 'get',
+    muteHttpExceptions: true
+  });
+}

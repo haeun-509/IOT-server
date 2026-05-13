@@ -1,0 +1,145 @@
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+#include "DHT.h"
+
+//////////////////////////////////////////////////////
+// 🔧 1. 센서 설정
+//////////////////////////////////////////////////////
+#define DHTPIN 4
+#define DHTTYPE DHT11
+DHT dht(DHTPIN, DHTTYPE);
+
+//////////////////////////////////////////////////////
+// 🌐 2. WiFi 설정
+//////////////////////////////////////////////////////
+const char* ssid = "bugs";
+const char* password = "bugs1234";
+
+//////////////////////////////////////////////////////
+// 🖥️ 3. 서버 주소 (Flask)
+//////////////////////////////////////////////////////
+const char* serverUrl = "http://172.16.11.220:5000/sensor";
+
+//////////////////////////////////////////////////////
+// ⏱️ 4. 주기 설정 (1분)
+//////////////////////////////////////////////////////
+unsigned long previousMillis = 0;
+const unsigned long interval = 60000;
+
+//////////////////////////////////////////////////////
+// 🚀 초기 설정
+//////////////////////////////////////////////////////
+void setup() {
+  Serial.begin(115200);
+  dht.begin();
+
+  WiFi.begin(ssid, password);
+  Serial.print("WiFi 연결 중");
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("\nWiFi 연결 완료");
+}
+
+//////////////////////////////////////////////////////
+// 🔁 반복 실행
+//////////////////////////////////////////////////////
+void loop() {
+  unsigned long currentMillis = millis();
+
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+    sendData();
+  }
+}
+
+//////////////////////////////////////////////////////
+// 📡 센서 전송 + JSON 처리
+//////////////////////////////////////////////////////
+void sendData() {
+
+  // 🌡️ 센서 값 읽기
+  float temp = dht.readTemperature();
+  float hum = dht.readHumidity();
+
+  if (isnan(temp) || isnan(hum)) {
+    Serial.println("센서 읽기 실패");
+    return;
+  }
+
+  Serial.printf("온도: %.1f / 습도: %.1f\n", temp, hum);
+
+  //////////////////////////////////////////////////////
+  // 🌐 HTTP 요청 준비
+  //////////////////////////////////////////////////////
+  HTTPClient http;
+  http.begin(serverUrl);          // HTTP 사용
+  http.setTimeout(10000);         // 타임아웃
+  http.addHeader("Content-Type", "application/json");
+
+  //////////////////////////////////////////////////////
+  // 🔥 JSON 객체 생성 (문자열 X)
+  //////////////////////////////////////////////////////
+  DynamicJsonDocument sendDoc(128);
+  sendDoc["temperature"] = temp;
+  sendDoc["humidity"] = hum;
+
+  String requestBody;
+  serializeJson(sendDoc, requestBody);
+
+  Serial.println("보내는 JSON:");
+  Serial.println(requestBody);
+
+  //////////////////////////////////////////////////////
+  // 📤 POST 요청
+  //////////////////////////////////////////////////////
+  int httpCode = http.POST(requestBody);
+
+  Serial.print("HTTP Code: ");
+  Serial.println(httpCode);
+
+  //////////////////////////////////////////////////////
+  // 📥 응답 처리
+  //////////////////////////////////////////////////////
+  if (httpCode > 0) {
+
+    String response = http.getString();
+
+    Serial.println("원본 응답:");
+    Serial.println(response);
+
+    //////////////////////////////////////////////////////
+    // 🔍 JSON 파싱
+    //////////////////////////////////////////////////////
+    DynamicJsonDocument resDoc(512);
+    DeserializationError error = deserializeJson(resDoc, response);
+
+    if (error) {
+      Serial.print("JSON 파싱 실패: ");
+      Serial.println(error.c_str());
+      http.end();
+      return;
+    }
+
+    //////////////////////////////////////////////////////
+    // 🤖 AI 결과 출력
+    //////////////////////////////////////////////////////
+    String result = resDoc["result"].as<String>();
+
+    Serial.println("AI 응답:");
+    Serial.println(result);
+
+  } else {
+    Serial.print("요청 실패, 에러 코드: ");
+    Serial.println(httpCode);
+  }
+
+  //////////////////////////////////////////////////////
+  // 🔚 연결 종료
+  //////////////////////////////////////////////////////
+  http.end();
+}
