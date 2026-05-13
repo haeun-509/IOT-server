@@ -40,22 +40,31 @@
             font-size: 1.5rem;
             font-weight: bold;
         }
+        .hint {
+            font-size: 1rem;
+            color: #555;
+        }
     </style>
 </head>
 <body>
     <h1>숫자 맞추기 게임</h1>
-    <p>1부터 10 사이의 숫자를 맞춰보세요!</p>
+    <p>1부터 10 사이의 숫자를 맞춰보세요! (기회: <span id="attempts">3</span>)</p>
     <input type="number" id="guess" placeholder="숫자를 입력하세요" min="1" max="10">
     <button onclick="checkGuess()">확인</button>
+    <button id="restart" style="display: none;" onclick="restartGame()">다시 시작</button>
     <div class="result" id="result"></div>
+    <div class="hint" id="hint"></div>
 
     <script>
         // 1부터 10 사이의 랜덤 숫자 생성
-        const randomNumber = Math.floor(Math.random() * 10) + 1;
+        let randomNumber = Math.floor(Math.random() * 10) + 1;
+        let attemptsLeft = 3;
 
         function checkGuess() {
-            const userGuess = document.getElementById('guess').value;
+            const userGuess = parseInt(document.getElementById('guess').value);
             const result = document.getElementById('result');
+            const hint = document.getElementById('hint');
+            const attempts = document.getElementById('attempts');
 
             if (!userGuess) {
                 result.textContent = "숫자를 입력하세요!";
@@ -63,16 +72,44 @@
                 return;
             }
 
-            if (userGuess == randomNumber) {
+            if (userGuess === randomNumber) {
                 result.textContent = "정답입니다! 🎉";
                 result.style.color = "green";
-            } else if (userGuess < randomNumber) {
-                result.textContent = "더 큰 숫자를 입력해보세요!";
-                result.style.color = "blue";
+                hint.textContent = "";
+                endGame();
             } else {
-                result.textContent = "더 작은 숫자를 입력해보세요!";
-                result.style.color = "blue";
+                attemptsLeft--;
+                attempts.textContent = attemptsLeft;
+
+                if (attemptsLeft === 0) {
+                    result.textContent = `게임 오버! 정답은 ${randomNumber}였습니다.`;
+                    result.style.color = "red";
+                    hint.textContent = "";
+                    endGame();
+                } else {
+                    result.textContent = userGuess < randomNumber ? "더 큰 숫자를 입력해보세요!" : "더 작은 숫자를 입력해보세요!";
+                    result.style.color = "blue";
+                    hint.textContent = `힌트: 입력한 숫자와 정답의 차이는 ${Math.abs(userGuess - randomNumber)}입니다.`;
+                }
             }
+        }
+
+        function endGame() {
+            document.getElementById('guess').disabled = true;
+            document.querySelector('button[onclick="checkGuess()"]').disabled = true;
+            document.getElementById('restart').style.display = "inline-block";
+        }
+
+        function restartGame() {
+            randomNumber = Math.floor(Math.random() * 10) + 1;
+            attemptsLeft = 3;
+            document.getElementById('guess').disabled = false;
+            document.querySelector('button[onclick="checkGuess()"]').disabled = false;
+            document.getElementById('restart').style.display = "none";
+            document.getElementById('result').textContent = "";
+            document.getElementById('hint').textContent = "";
+            document.getElementById('guess').value = "";
+            document.getElementById('attempts').textContent = attemptsLeft;
         }
     </script>
 </body>
